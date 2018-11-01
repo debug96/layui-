@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>layer省市区三级联动</title>
+    <!--引入layer-->
+    <link rel="stylesheet" type="text/css" href="/webjars/layui/2.4.3/css/layui.css">
+
+</head>
+<body>
+  <div class="layui-form layui-form-pane layui-main">
+      <div class="layui-form-item">
+          <label class="layui-form-label layui-bg-blue " style="width: 200px">layer省市区三级联动</label>
+          <div class="layui-input-inline">
+              <select id="province" name="province" lay-filter="province">
+                  <option value="" >请选择省</option>
+
+              </select>
+          </div>
+          <div class="layui-input-inline">
+              <select id="city" name="city" lay-filter="city">
+                  <option value="">请选择市</option>
+              </select>
+          </div>
+          <div class="layui-input-inline">
+              <select id="area" name="area" lay-filter="area">
+                  <option value="">请选择县/区</option>
+              </select>
+          </div>
+      </div>
+
+  </div>
+</body>
+<script type="application/javascript" src="/webjars/layui/2.4.3/layui.all.js"></script>
+<script type="application/javascript">
+    
+    var loadModel = ['form','jquery'];
+    layui.use(loadModel, function(){
+        var $ = layui.jquery;
+        var form = layui.form;
+            $.ajax({
+                url: '/findByParentId/-1',
+                type: 'GET',
+                dataType: 'json',
+                success:function (response) {
+                    var provincesHtml = '<option value="" >请选择省</option>';
+                    $.each(response,function (index,item) {
+                        provincesHtml+='<option value="'+item.areaId+'">'+item.areaName+'</option>';
+                    })
+                    $('#province').html(provincesHtml);
+                    form.render();
+                }
+            });
+
+            form.on('select(province)', function(data){
+                console.log(data);
+                var areaId = data.value;
+                $.ajax({
+                    url: '/findByParentId/'+areaId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success:function (response) {
+                        var areaHtml = '<option value="">请选择市</option>';
+                        $.each(response,function (index,item) {
+                            areaHtml+='<option value="'+item.areaId+'">'+item.areaName+'</option>';
+                        })
+                        $('#city').html(areaHtml);
+                        form.render();
+                    }
+                });
+            });
+
+        form.on('select(city)', function(data){
+            console.log(data);
+            var areaId = data.value;
+            $.ajax({
+                url: '/findByParentId/'+areaId,
+                type: 'GET',
+                dataType: 'json',
+                success:function (response) {
+                    var citiesHtml = '<option value="">请选择县/区</option>';
+                    $.each(response,function (index,item) {
+                        citiesHtml+='<option value="'+item.areaId+'">'+item.areaName+'</option>';
+                    })
+                    $('#area').html(citiesHtml);
+                    form.render();
+                }
+            });
+        });
+
+    });
+
+
+</script>
+
+
+
+</html>
